@@ -7,7 +7,11 @@ require("dotenv").config();
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:3000", "http://localhost:3001"];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "https://todolist-fe-three.vercel.app/",
+];
 
 app.use(cors({ origin: allowedOrigins }));
 
