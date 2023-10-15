@@ -8,12 +8,24 @@ router.post("/todo", async (req, res) => {
   const { name, status } = req.body;
 
   try {
+    if (!req.body.name) {
+      res.status(400).json({ status: "error", message: "Name is required" });
+      return;
+    }
+
+    if (!req.body.status) {
+      res.status(400).json({ status: "error", message: "Status is required" });
+      return;
+    }
+
     const todo = new Todo({ name, status });
     await todo.save();
-    res.send(todo);
+    res
+      .status(201)
+      .send({ status: "success", message: "Todo created successfully", todo });
   } catch (error) {
     console.error(error);
-    res.status(500).send(error);
+    res.status(500).json({ status: "error", message: "Internal server error" });
   }
 });
 
@@ -21,10 +33,14 @@ router.post("/todo", async (req, res) => {
 router.get("/todos", async (req, res) => {
   try {
     const todos = await Todo.find(req.query);
-    res.send({ data: todos });
+    res.status(200).send({
+      status: "success",
+      message: "Todo retrieved successfully",
+      data: todos,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).send(error);
+    res.status(500).json({ status: "error", message: "Internal server error" });
   }
 });
 
@@ -33,11 +49,19 @@ router.get("/todo/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const todos = await Todo.findById(id);
-    res.send({ data: todos });
+    const todo = await Todo.findById(id);
+    if (!todo) {
+      res.status(404).json({ status: "error", message: "Todo not found" });
+      return;
+    }
+    res.status(200).send({
+      status: "success",
+      message: "Todo retrieved successfully",
+      data: todo,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).send(error);
+    res.status(500).json({ status: "error", message: "Internal server error" });
   }
 });
 
@@ -52,10 +76,20 @@ router.put("/todo/:id", async (req, res) => {
       { name, status },
       { new: true }
     );
-    res.send(todo);
+
+    if (!todo) {
+      res.status(404).json({ status: "error", message: "Todo not found" });
+      return;
+    }
+
+    res.status(200).send({
+      status: "success",
+      message: "Todo updated successfully",
+      data: todo,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).send(error);
+    res.status(500).json({ status: "error", message: "Internal server error" });
   }
 });
 
@@ -65,10 +99,14 @@ router.delete("/todo/:id", async (req, res) => {
 
   try {
     const todo = await Todo.findByIdAndDelete(id);
-    res.send(todo);
+    if (!todo) {
+      res.status(404).json({ status: "error", message: "Todo not found" });
+      return;
+    }
+    res.status(204).json();
   } catch (error) {
     console.error(error);
-    res.status(500).send(error);
+    res.status(500).json({ status: "error", message: "Internal server error" });
   }
 });
 
